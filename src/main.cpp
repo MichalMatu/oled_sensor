@@ -95,11 +95,6 @@ void setup()
 
 unsigned long previousMillis = 0;
 int currentMenuOption = 1;
-int co2Index = 0;
-int temperatureIndex = 128;
-int humidityIndex = 256;
-int sensorIndex = 0;
-int maxSensorIndex = 128;
 
 void loop()
 {
@@ -108,31 +103,8 @@ void loop()
   {
     // Read new measurement
     scd4x.readMeasurement(co2, temperature, humidity);
-    // save to eeprom
 
-    if (sensorIndex == maxSensorIndex)
-    {
-      sensorIndex = 0;
-      co2Index = 0;
-      temperatureIndex = 128;
-      humidityIndex = 256;
-    }
-    else
-    {
-      sensorIndex++;
-      co2Index++;
-      temperatureIndex++;
-      humidityIndex++;
-    }
-
-    EEPROM.put(co2Index, co2);
-    EEPROM.put(temperatureIndex, temperature);
-    EEPROM.put(humidityIndex, humidity);
-
-    // Update previous millis time
     previousMillis = millis();
-
-    // ... (other code) ...
   }
 
   // Handle menu navigation and actions using a switch-case
@@ -162,6 +134,7 @@ void loop()
     display.clearDisplay();
     display.drawPixel(10, 10, SSD1306_WHITE);
 
+    delay(1000);
     break;
 
     // Add more cases for other menu options
