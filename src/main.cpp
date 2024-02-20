@@ -93,7 +93,7 @@ void setup()
 }
 
 unsigned long previousMillis = 0;
-
+int currentMenuOption = 1;
 void loop()
 {
   // Check if 10 seconds have passed since last measurement
@@ -105,6 +105,13 @@ void loop()
     // Update previous millis time
     previousMillis = millis();
 
+    // ... (other code) ...
+  }
+
+  // Handle menu navigation and actions using a switch-case
+  switch (currentMenuOption)
+  {
+  case 0: // Display sensor readings
     // Clear the buffer and set cursor position
     display.clearDisplay();
     display.setCursor(0, 10);
@@ -122,7 +129,17 @@ void loop()
     display.print(co2);
     display.println("ppm");
 
-    // Display the updated content
-    display.display();
+    break;
+
+  case 1:
+    display.clearDisplay();
+    display.drawPixel(10, 10, SSD1306_WHITE);
+
+    break;
+
+    // Add more cases for other menu options
   }
+
+  // Display the updated content
+  display.display();
 }
