@@ -91,10 +91,22 @@ void setup()
   display.setCursor(50, 40);
   display.print("OK");
   display.display(); // actually display all of the above
+  // clear eeprom memory
+  for (int i = 0; i < 384; i++)
+  {
+    EEPROM.write(i, 0);
+    EEPROM.commit();
+  }
 }
 
 unsigned long previousMillis = 0;
 int currentMenuOption = 1;
+int address0 = 0;
+int address1 = 128;
+int address2 = 256;
+
+// delcare array to store co2 values
+int co2Array[128];
 
 void loop()
 {
@@ -104,11 +116,25 @@ void loop()
     // Read new measurement
     scd4x.readMeasurement(co2, temperature, humidity);
     // save to eeprom co2, temperature, humidity
-    EEPROM.put(0, co2);
-    EEPROM.put(2, temperature);
-    EEPROM.put(4, humidity);
-    EEPROM.commit();
 
+    EEPROM.put(address0, co2);
+    EEPROM.put(address1, temperature);
+    EEPROM.put(address2, humidity);
+    EEPROM.commit();
+    // Move to the next addresses
+    address0++, address1++, address2++;
+    if (address0 >= 128)
+    {
+      address0 = 0;
+    }
+    if (address1 >= 256)
+    {
+      address1 = 128;
+    }
+    if (address2 >= 384)
+    {
+      address2 = 256;
+    }
     previousMillis = millis();
   }
 
@@ -141,18 +167,18 @@ void loop()
     // read from eeprom co2, temperature, humidity and display in serial monitor
 
     EEPROM.get(0, co2);
-    EEPROM.get(2, temperature);
-    EEPROM.get(4, humidity);
-    Serial.print("T: ");
-    Serial.print((int)temperature);
-    Serial.println(" C");
-    Serial.print("H: ");
-    Serial.print((int)humidity);
-    Serial.println(" %RH");
-    Serial.print("CO2:");
-    Serial.print(co2);
-    Serial.println("ppm");
+    EEPROM.get(128, temperature);
+    EEPROM.get(256, humidity);
+    Serial.println(co2);
+    Serial.println(temperature);
+    Serial.println(humidity);
 
+    // read from eeprom co2 and store it in array
+    for (int i = 0; i < 128; i++)
+    {
+      EEPROM.get(i, co2Array[i]);
+      Serial.println(co2Array[i]);
+    }
     delay(1000);
     break;
 
