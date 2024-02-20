@@ -3,9 +3,10 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <SensirionI2CScd4x.h>
-// include &FreeMono9pt7b
 #include <Fonts/FreeMono9pt7b.h>
+#include <EEPROM.h>
 #define WIRE Wire
+
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &WIRE);
 
 SensirionI2CScd4x scd4x;
@@ -94,6 +95,12 @@ void setup()
 
 unsigned long previousMillis = 0;
 int currentMenuOption = 1;
+int co2Index = 0;
+int temperatureIndex = 128;
+int humidityIndex = 256;
+int sensorIndex = 0;
+int maxSensorIndex = 128;
+
 void loop()
 {
   // Check if 10 seconds have passed since last measurement
@@ -101,6 +108,26 @@ void loop()
   {
     // Read new measurement
     scd4x.readMeasurement(co2, temperature, humidity);
+    // save to eeprom
+
+    if (sensorIndex == maxSensorIndex)
+    {
+      sensorIndex = 0;
+      co2Index = 0;
+      temperatureIndex = 128;
+      humidityIndex = 256;
+    }
+    else
+    {
+      sensorIndex++;
+      co2Index++;
+      temperatureIndex++;
+      humidityIndex++;
+    }
+
+    EEPROM.put(co2Index, co2);
+    EEPROM.put(temperatureIndex, temperature);
+    EEPROM.put(humidityIndex, humidity);
 
     // Update previous millis time
     previousMillis = millis();
