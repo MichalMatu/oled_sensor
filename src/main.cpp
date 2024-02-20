@@ -103,6 +103,11 @@ void loop()
   {
     // Read new measurement
     scd4x.readMeasurement(co2, temperature, humidity);
+    // save to eeprom co2, temperature, humidity
+    EEPROM.put(0, co2);
+    EEPROM.put(2, temperature);
+    EEPROM.put(4, humidity);
+    EEPROM.commit();
 
     previousMillis = millis();
   }
@@ -133,6 +138,20 @@ void loop()
   case 1:
     display.clearDisplay();
     display.drawPixel(10, 10, SSD1306_WHITE);
+    // read from eeprom co2, temperature, humidity and display in serial monitor
+
+    EEPROM.get(0, co2);
+    EEPROM.get(2, temperature);
+    EEPROM.get(4, humidity);
+    Serial.print("T: ");
+    Serial.print((int)temperature);
+    Serial.println(" C");
+    Serial.print("H: ");
+    Serial.print((int)humidity);
+    Serial.println(" %RH");
+    Serial.print("CO2:");
+    Serial.print(co2);
+    Serial.println("ppm");
 
     delay(1000);
     break;
