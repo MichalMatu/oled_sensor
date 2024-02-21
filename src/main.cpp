@@ -85,8 +85,18 @@ void setup()
 unsigned long previousMillis = 0;
 int currentMenuOption = 3;
 
+unsigned long menuMillis = 0;
+
 void loop()
 {
+
+  // use menu millis to change menu option every 5 seconds from 0 to 3
+  if (millis() - menuMillis >= 5000)
+  {
+    currentMenuOption = (currentMenuOption + 1) % 4;
+    menuMillis = millis();
+  }
+
   if (millis() - previousMillis >= 11000)
   {
     // Temporary variables for CO2 readings
@@ -115,6 +125,8 @@ void loop()
   {
   case 0:
     display.clearDisplay();
+    display.setFont(&FreeMono9pt7b);
+    display.setTextSize(1);
     display.setCursor(0, 10);
     display.print("T: ");
     display.print((int)temperature);
@@ -140,6 +152,10 @@ void loop()
     {
       display.drawPixel(i, 15, SSD1306_WHITE); // Plot CO2 values
     }
+    // in bottom left corner dispaly current CO2
+    display.setCursor(0, 60);
+    display.print(co2Array[co2Index]);
+    display.print("ppm");
 
     // in top right  corner draw 2000
     display.setCursor(100, 10);
@@ -167,7 +183,10 @@ void loop()
     {
       display.drawPixel(i, 15, SSD1306_WHITE); // Plot CO2 values
     }
-
+    // in bottom left corner dispaly current temperature
+    display.setCursor(0, 60);
+    display.print(tempArray[tempIndex]);
+    display.print("C");
     // in top right  corner draw 2000
     display.setCursor(100, 10);
     // use tiny font
@@ -194,15 +213,19 @@ void loop()
     {
       display.drawPixel(i, 15, SSD1306_WHITE); // Plot CO2 values
     }
+    // in bottom left corner dispaly current humidity
+    display.setCursor(0, 60);
+    display.print(humArray[humIndex]);
+    display.print("%");
 
     // in top right  corner draw 2000
     display.setCursor(100, 10);
     // use tiny font
     display.setFont(&Org_01);
-    display.print("100");
+    display.print("100%");
     // in bottom right corner draw 400
     display.setCursor(100, 60);
-    display.print("0");
+    display.print("0%");
     for (int i = 0; i < BUFFER_SIZE; i++)
     {
       display.drawPixel(i, map(humArray[i], 0, 100, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
