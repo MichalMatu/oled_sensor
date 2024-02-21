@@ -4,7 +4,6 @@
 #include <Adafruit_SSD1306.h>
 #include <SensirionI2CScd4x.h>
 #include <Fonts/FreeMono9pt7b.h>
-#include <EEPROM.h>
 #define WIRE Wire
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &WIRE);
@@ -91,19 +90,10 @@ void setup()
   display.setCursor(50, 40);
   display.print("OK");
   display.display(); // actually display all of the above
-  // clear eeprom memory
-  for (int i = 0; i < 384; i++)
-  {
-    EEPROM.write(i, 0);
-    EEPROM.commit();
-  }
 }
 
 unsigned long previousMillis = 0;
-int currentMenuOption = 1;
-int address0 = 0;
-int address1 = 2; // Updated address for temperature
-int address2 = 4; // Updated address for humidity
+int currentMenuOption = 0;
 
 // delcare array to store co2 values
 int co2Array[128];
@@ -115,20 +105,6 @@ void loop()
   {
     // Read new measurement
     scd4x.readMeasurement(co2, temperature, humidity);
-    // save to eeprom co2, temperature, humidity
-    delay(1000);
-    // Write CO2 data to EEPROM at address0
-    EEPROM.put(address0, co2);
-    // Write temperature data to EEPROM at address1
-    EEPROM.put(address1, temperature);
-    // Write humidity data to EEPROM at address2
-    EEPROM.put(address2, humidity);
-    // Move to the next addresses
-    address0 += sizeof(co2);
-    address1 += sizeof(temperature);
-    address2 += sizeof(humidity);
-
-    EEPROM.commit();
 
     previousMillis = millis();
   }
@@ -159,29 +135,8 @@ void loop()
   case 1:
     display.clearDisplay();
     display.drawPixel(10, 10, SSD1306_WHITE);
-    // read from EEPROM CO2, temperature, humidity, and display in serial monitor
+    // read from eeprom co2, temperature, humidity and display in serial monitor
 
-    EEPROM.get(address0, co2);
-    EEPROM.get(address1, temperature);
-    EEPROM.get(address2, humidity);
-
-    Serial.println("Stored Sensor Readings:");
-    Serial.print("CO2: ");
-    Serial.println(co2);
-    Serial.print("Temperature: ");
-    Serial.println(temperature);
-    Serial.print("Humidity: ");
-    Serial.println(humidity);
-
-    // read from EEPROM CO2 and store it in array
-    for (int i = 0; i < 128; i++)
-    {
-      EEPROM.get(address0 + i * sizeof(co2), co2Array[i]);
-      Serial.print("CO2 Array [");
-      Serial.print(i);
-      Serial.print("]: ");
-      Serial.println(co2Array[i]);
-    }
     delay(1000);
     break;
 
