@@ -2,6 +2,8 @@
 #include <Adafruit_SSD1306.h>
 #include <SensirionI2CScd4x.h>
 #include <Fonts/FreeMono9pt7b.h>
+// include Fonts/Tiny3x3a2pt7b.h
+#include <Fonts/Org_01.h>
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
 SensirionI2CScd4x scd4x;
@@ -75,7 +77,7 @@ int currentMenuOption = 1;
 
 void loop()
 {
-  if (millis() - previousMillis >= 10000)
+  if (millis() - previousMillis >= 11000)
   {
     // Temporary variables for CO2 readings
     uint16_t tempCO2;
@@ -88,7 +90,8 @@ void loop()
     {
       // Move index circularly
       co2Index = (co2Index + 1) % BUFFER_SIZE;
-      // Store CO2 reading in circular buffer
+      // Store average CO2 reading from 1 hour in circular buffer
+
       co2Array[co2Index] = tempCO2;
     }
 
@@ -115,6 +118,24 @@ void loop()
 
   case 1:
     display.clearDisplay();
+    // in top left corner draw 24m CO2 graph
+    display.setCursor(0, 10);
+    display.setFont(&Org_01);
+    display.print("24m CO2");
+    // below draw points from left to right representinh 1 hour pass
+    for (int i = 0; i < 128; i = i + 11)
+    {
+      display.drawPixel(i, 15, SSD1306_WHITE); // Plot CO2 values
+    }
+
+    // in top right  corner draw 2000
+    display.setCursor(100, 10);
+    // use tiny font
+    display.setFont(&Org_01);
+    display.print("2000");
+    // in bottom right corner draw 400
+    display.setCursor(100, 60);
+    display.print("400");
     for (int i = 0; i < BUFFER_SIZE; i++)
     {
       display.drawPixel(i, map(co2Array[i], 400, 2000, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
