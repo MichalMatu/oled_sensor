@@ -37,12 +37,12 @@ void setup()
   scd4x.begin(Wire);
 
   // Temporary variables for CO2 readings
-  uint16_t tempCO2;
-  float tempTemp;
-  float tempHum;
+  uint16_t CO2;
+  float Temp;
+  float Hum;
 
   // Read initial CO2 measurement
-  error = scd4x.readMeasurement(tempCO2, tempTemp, tempHum);
+  error = scd4x.readMeasurement(CO2, Temp, Hum);
   if (error)
   {
     Serial.print("Error trying to execute readMeasurement(): ");
@@ -51,7 +51,7 @@ void setup()
   }
   else
   {
-    co2Array[co2Index] = tempCO2;
+    co2Array[co2Index] = CO2;
   }
 
   error = scd4x.stopPeriodicMeasurement();
@@ -100,22 +100,25 @@ void loop()
   if (millis() - previousMillis >= 11000)
   {
     // Temporary variables for CO2 readings
-    uint16_t tempCO2;
-    float tempTemp;
-    float tempHum;
+    uint16_t CO2;
+    float Temp;
+    float Hum;
 
     // Read new CO2 measurement
-    uint16_t error = scd4x.readMeasurement(tempCO2, tempTemp, tempHum);
+    uint16_t error = scd4x.readMeasurement(CO2, Temp, Hum);
     if (!error)
     {
 
       // Move index circularly
       co2Index = (co2Index + 1) % BUFFER_SIZE;
-      co2Array[co2Index] = tempCO2;
+      co2Array[co2Index] = CO2;
       tempIndex = (tempIndex + 1) % TEMP_BUFFER_SIZE;
-      tempArray[tempIndex] = tempTemp;
+      tempArray[tempIndex] = Temp;
       humIndex = (humIndex + 1) % HUM_BUFFER_SIZE;
-      humArray[humIndex] = tempHum;
+      humArray[humIndex] = Hum;
+      // Update temperature and humidity
+      temperature = Temp;
+      humidity = Hum;
     }
 
     previousMillis = millis();
