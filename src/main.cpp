@@ -83,7 +83,7 @@ void setup()
 }
 
 unsigned long previousMillis = 0;
-int currentMenuOption = 2;
+int currentMenuOption = 3;
 
 void loop()
 {
@@ -179,6 +179,33 @@ void loop()
     for (int i = 0; i < BUFFER_SIZE; i++)
     {
       display.drawPixel(i, map(tempArray[i], 0, 50, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
+    }
+    delay(1000);
+    break;
+
+  case 3:
+    display.clearDisplay();
+    // in top left corner draw 24m CO2 graph
+    display.setCursor(0, 10);
+    display.setFont(&Org_01);
+    display.print("24m humidity");
+    // below draw points from left to right representinh 1 hour pass
+    for (int i = 0; i < 128; i = i + 11)
+    {
+      display.drawPixel(i, 15, SSD1306_WHITE); // Plot CO2 values
+    }
+
+    // in top right  corner draw 2000
+    display.setCursor(100, 10);
+    // use tiny font
+    display.setFont(&Org_01);
+    display.print("100");
+    // in bottom right corner draw 400
+    display.setCursor(100, 60);
+    display.print("0");
+    for (int i = 0; i < BUFFER_SIZE; i++)
+    {
+      display.drawPixel(i, map(humArray[i], 0, 100, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
     delay(1000);
     break;
