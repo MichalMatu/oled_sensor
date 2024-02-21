@@ -102,8 +102,8 @@ void setup()
 unsigned long previousMillis = 0;
 int currentMenuOption = 1;
 int address0 = 0;
-int address1 = 128;
-int address2 = 256;
+int address1 = 2; // Updated address for temperature
+int address2 = 4; // Updated address for humidity
 
 // delcare array to store co2 values
 int co2Array[128];
@@ -116,25 +116,20 @@ void loop()
     // Read new measurement
     scd4x.readMeasurement(co2, temperature, humidity);
     // save to eeprom co2, temperature, humidity
-
+    delay(1000);
+    // Write CO2 data to EEPROM at address0
     EEPROM.put(address0, co2);
+    // Write temperature data to EEPROM at address1
     EEPROM.put(address1, temperature);
+    // Write humidity data to EEPROM at address2
     EEPROM.put(address2, humidity);
-    EEPROM.commit();
     // Move to the next addresses
-    address0++, address1++, address2++;
-    if (address0 >= 128)
-    {
-      address0 = 0;
-    }
-    if (address1 >= 256)
-    {
-      address1 = 128;
-    }
-    if (address2 >= 384)
-    {
-      address2 = 256;
-    }
+    address0 += sizeof(co2);
+    address1 += sizeof(temperature);
+    address2 += sizeof(humidity);
+
+    EEPROM.commit();
+
     previousMillis = millis();
   }
 
@@ -164,19 +159,27 @@ void loop()
   case 1:
     display.clearDisplay();
     display.drawPixel(10, 10, SSD1306_WHITE);
-    // read from eeprom co2, temperature, humidity and display in serial monitor
+    // read from EEPROM CO2, temperature, humidity, and display in serial monitor
 
-    EEPROM.get(0, co2);
-    EEPROM.get(128, temperature);
-    EEPROM.get(256, humidity);
+    EEPROM.get(address0, co2);
+    EEPROM.get(address1, temperature);
+    EEPROM.get(address2, humidity);
+
+    Serial.println("Stored Sensor Readings:");
+    Serial.print("CO2: ");
     Serial.println(co2);
+    Serial.print("Temperature: ");
     Serial.println(temperature);
+    Serial.print("Humidity: ");
     Serial.println(humidity);
 
-    // read from eeprom co2 and store it in array
+    // read from EEPROM CO2 and store it in array
     for (int i = 0; i < 128; i++)
     {
-      EEPROM.get(i, co2Array[i]);
+      EEPROM.get(address0 + i * sizeof(co2), co2Array[i]);
+      Serial.print("CO2 Array [");
+      Serial.print(i);
+      Serial.print("]: ");
       Serial.println(co2Array[i]);
     }
     delay(1000);
