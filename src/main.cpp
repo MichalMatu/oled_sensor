@@ -136,7 +136,7 @@ void drawMenu()
     // below draw points from left to right representinh 1 hour pass
     for (int i = 0; i < 128; i = i + 11)
     {
-      display.drawPixel(i, 38, SSD1306_WHITE); // Plot CO2 values
+      display.drawPixel(i, 40, SSD1306_WHITE); // Plot CO2 values
     }
     // in bottom left corner dispaly current CO2
     display.setCursor(0, 60);
