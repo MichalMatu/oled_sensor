@@ -145,11 +145,6 @@ void drawMenu()
     display.print(co2Array[co2Index]);
     display.print("ppm");
 
-    // in top right  corner draw 2000
-    display.setCursor(100, 38);
-    // use tiny font
-    display.setFont(&Org_01);
-    display.print("1000");
     for (int i = 0; i < BUFFER_SIZE; i++)
     {
       display.drawPixel(i, map(co2Array[i], 400, 2000, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
