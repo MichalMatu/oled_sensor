@@ -112,7 +112,18 @@ void drawMenu()
     display.print(" %");
     display.println();
     display.print("CO2:");
-    display.print(co2Array[co2Index]);
+    if (co2Array[co2Index] > 1000)
+    {
+      // blink if CO2 is more than 1000
+      if (millis() % 1000 > 500)
+      {
+        display.print(co2Array[co2Index]);
+      }
+    }
+    else
+    {
+      display.print(co2Array[co2Index]);
+    }
     break;
 
   case 1:
@@ -124,7 +135,7 @@ void drawMenu()
     // below draw points from left to right representinh 1 hour pass
     for (int i = 0; i < 128; i = i + 11)
     {
-      display.drawPixel(i, 15, SSD1306_WHITE); // Plot CO2 values
+      display.drawPixel(i, 38, SSD1306_WHITE); // Plot CO2 values
     }
     // in bottom left corner dispaly current CO2
     display.setCursor(0, 60);
@@ -134,13 +145,10 @@ void drawMenu()
     display.print("ppm");
 
     // in top right  corner draw 2000
-    display.setCursor(100, 10);
+    display.setCursor(100, 38);
     // use tiny font
     display.setFont(&Org_01);
-    display.print("2000");
-    // in bottom right corner draw 400
-    display.setCursor(100, 60);
-    display.print("400");
+    display.print("1000");
     for (int i = 0; i < BUFFER_SIZE; i++)
     {
       display.drawPixel(i, map(co2Array[i], 400, 2000, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
