@@ -71,6 +71,7 @@ void readSensors()
     uint16_t CO2;
     float Temp, Hum;
     uint16_t error = scd4x.readMeasurement(CO2, Temp, Hum);
+    delay(100);
 
     if (!error)
     {
