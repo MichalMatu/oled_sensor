@@ -145,7 +145,6 @@ void drawMenu()
     {
       display.drawPixel(i, map(co2Array[i], 400, 2000, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
-    delay(1000);
     break;
 
   case 2:
@@ -177,7 +176,6 @@ void drawMenu()
     {
       display.drawPixel(i, map(tempArray[i], 0, 50, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
-    delay(1000);
     break;
 
   case 3:
@@ -210,7 +208,6 @@ void drawMenu()
     {
       display.drawPixel(i, map(humArray[i], 0, 100, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
-    delay(1000);
     break;
   }
   display.display();
