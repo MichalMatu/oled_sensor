@@ -2,7 +2,7 @@
 #include <Adafruit_SSD1306.h>
 #include <SensirionI2CScd4x.h>
 #include <Fonts/FreeMono9pt7b.h>
-// include Fonts/Tiny3x3a2pt7b.h
+#include <Fonts/FreeMono12pt7b.h>
 #include <Fonts/Org_01.h>
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
@@ -26,6 +26,13 @@ int humIndex = 0;
 float temperature = 0.0f;
 float humidity = 0.0f;
 
+// *****************************************************************************
+// define 4 button pins left, right, up, down 14, 27, 26, 25
+
+int buttonPins[] = {14, 27, 26, 25};
+
+// *****************************************************************************
+
 void setup()
 {
   Serial.begin(115200);
@@ -40,6 +47,11 @@ void setup()
   uint16_t CO2;
   float Temp;
   float Hum;
+  // set button pins to high
+  for (int i = 0; i < 4; i++)
+  {
+    pinMode(buttonPins[i], INPUT_PULLUP);
+  }
 
   // Read initial CO2 measurement
   error = scd4x.readMeasurement(CO2, Temp, Hum);
@@ -83,33 +95,59 @@ void setup()
 }
 
 unsigned long previousMillis = 0;
-int currentMenuOption = 3;
+int currentMenuOption = 0;
 
 unsigned long menuMillis = 0;
+// implement debouncing for buttons 100ms
+int debounceDelay = 100;
 
 void loop()
 {
+  // Read button states
+  int leftButtonState = digitalRead(buttonPins[0]);
+  int rightButtonState = digitalRead(buttonPins[1]);
+  int upButtonState = digitalRead(buttonPins[2]);
+  int downButtonState = digitalRead(buttonPins[3]);
 
-  // use menu millis to change menu option every 5 seconds from 0 to 3
-  if (millis() - menuMillis >= 5000)
+  // Check if left button is pressed
+  if (leftButtonState == LOW)
   {
     currentMenuOption = (currentMenuOption + 1) % 4;
-    menuMillis = millis();
+    delay(debounceDelay); // Debounce delay
   }
 
+  // Check if right button is pressed
+  if (rightButtonState == LOW)
+  {
+    currentMenuOption = (currentMenuOption - 1 + 4) % 4;
+    delay(debounceDelay); // Debounce delay
+  }
+
+  // Check if up button is pressed
+  if (upButtonState == LOW)
+  {
+    // Action for up button
+    delay(debounceDelay); // Debounce delay
+  }
+
+  // Check if down button is pressed
+  if (downButtonState == LOW)
+  {
+    // Action for down button
+    delay(debounceDelay); // Debounce delay
+  }
+
+  // Read CO2 measurements every 11 seconds
   if (millis() - previousMillis >= 11000)
   {
-    // Temporary variables for CO2 readings
+    // Read CO2 measurements
     uint16_t CO2;
     float Temp;
     float Hum;
-
-    // Read new CO2 measurement
     uint16_t error = scd4x.readMeasurement(CO2, Temp, Hum);
     if (!error)
     {
-
-      // Move index circularly
+      // Update circular buffers
       co2Index = (co2Index + 1) % BUFFER_SIZE;
       co2Array[co2Index] = CO2;
       tempIndex = (tempIndex + 1) % TEMP_BUFFER_SIZE;
@@ -120,7 +158,6 @@ void loop()
       temperature = Temp;
       humidity = Hum;
     }
-
     previousMillis = millis();
   }
 
@@ -128,20 +165,19 @@ void loop()
   {
   case 0:
     display.clearDisplay();
-    display.setFont(&FreeMono9pt7b);
+    display.setFont(&FreeMono12pt7b);
     display.setTextSize(1);
-    display.setCursor(0, 10);
+    display.setCursor(0, 15);
     display.print("T: ");
     display.print((int)temperature);
     display.print(" C");
     display.println();
     display.print("H: ");
     display.print((int)humidity);
-    display.print(" %RH");
+    display.print(" %");
     display.println();
     display.print("CO2:");
-    display.print(co2Array[co2Index]); // Display latest CO2 value
-    display.println("ppm");
+    display.print(co2Array[co2Index]);
     break;
 
   case 1:
@@ -157,6 +193,8 @@ void loop()
     }
     // in bottom left corner dispaly current CO2
     display.setCursor(0, 60);
+    // set font to be bigger
+    display.setFont(&FreeMono9pt7b);
     display.print(co2Array[co2Index]);
     display.print("ppm");
 
@@ -188,6 +226,8 @@ void loop()
     }
     // in bottom left corner dispaly current temperature
     display.setCursor(0, 60);
+    // set font to be bigger
+    display.setFont(&FreeMono9pt7b);
     display.print(tempArray[tempIndex]);
     display.print("C");
     // in top right  corner draw 2000
@@ -207,7 +247,7 @@ void loop()
 
   case 3:
     display.clearDisplay();
-    // in top left corner draw 24m CO2 graph
+    // in top left corner draw 24m humidity graph
     display.setCursor(0, 10);
     display.setFont(&Org_01);
     display.print("24m humidity");
@@ -218,6 +258,8 @@ void loop()
     }
     // in bottom left corner dispaly current humidity
     display.setCursor(0, 60);
+    // set font to be bigger
+    display.setFont(&FreeMono9pt7b);
     display.print(humArray[humIndex]);
     display.print("%");
 
