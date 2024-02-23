@@ -1,3 +1,4 @@
+
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <SensirionI2CScd4x.h>
@@ -5,84 +6,33 @@
 #include <Fonts/FreeMono12pt7b.h>
 #include <Fonts/Org_01.h>
 
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
+// Constants
+const int BUFFER_SIZE = 64;
+const int DEBOUNCE_DELAY = 50;
+const int MENU_OPTIONS = 4;
+const int buttonPins[] = {14, 27, 26, 25};
+
+// Global variables
+Adafruit_SSD1306 display(128, 64, &Wire);
 SensirionI2CScd4x scd4x;
-
-// Define circular buffer for CO2 values
-const int BUFFER_SIZE = 128;
 int co2Array[BUFFER_SIZE];
-int co2Index = 0;
-
-// Define circular buffer for temperature values
-const int TEMP_BUFFER_SIZE = 128;
-float tempArray[TEMP_BUFFER_SIZE];
-int tempIndex = 0;
-
-// Define circular buffer for humidity values
-const int HUM_BUFFER_SIZE = 128;
-float humArray[HUM_BUFFER_SIZE];
-int humIndex = 0;
-
-float temperature = 0.0f;
-float humidity = 0.0f;
-
-// *****************************************************************************
-// define 4 button pins left, right, up, down 14, 27, 26, 25
-
-int buttonPins[] = {14, 27, 26, 25};
-
-// *****************************************************************************
+float tempArray[BUFFER_SIZE];
+float humArray[BUFFER_SIZE];
+int co2Index = 0, tempIndex = 0, humIndex = 0;
+float temperature = 0.0f, humidity = 0.0f;
+int currentMenuOption = 0;
+unsigned long previousMillis = 0;
 
 void setup()
 {
   Serial.begin(115200);
   Wire.begin();
-
-  uint16_t error;
-  char errorMessage[256];
-
   scd4x.begin(Wire);
 
-  // Temporary variables for CO2 readings
-  uint16_t CO2;
-  float Temp;
-  float Hum;
-  // set button pins to high
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < MENU_OPTIONS; i++)
   {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
-
-  // Read initial CO2 measurement
-  error = scd4x.readMeasurement(CO2, Temp, Hum);
-  if (error)
-  {
-    Serial.print("Error trying to execute readMeasurement(): ");
-    errorToString(error, errorMessage, 256);
-    Serial.println(errorMessage);
-  }
-  else
-  {
-    co2Array[co2Index] = CO2;
-  }
-
-  error = scd4x.stopPeriodicMeasurement();
-  if (error)
-  {
-    Serial.print("Error trying to execute stopPeriodicMeasurement(): ");
-    errorToString(error, errorMessage, 256);
-    Serial.println(errorMessage);
-  }
-
-  error = scd4x.startPeriodicMeasurement();
-  if (error)
-  {
-    Serial.print("Error trying to execute startPeriodicMeasurement(): ");
-    errorToString(error, errorMessage, 256);
-    Serial.println(errorMessage);
-  }
-
-  Serial.println("Waiting for first measurement... (5 sec)");
 
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.clearDisplay();
@@ -92,75 +42,60 @@ void setup()
   display.setCursor(50, 40);
   display.print("OK");
   display.display();
+
+  Serial.println("Waiting for first measurement... (5 sec)");
 }
 
-unsigned long previousMillis = 0;
-int currentMenuOption = 0;
-
-unsigned long menuMillis = 0;
-// implement debouncing for buttons 100ms
-int debounceDelay = 100;
-
-void loop()
+void readButtons()
 {
-  // Read button states
   int leftButtonState = digitalRead(buttonPins[0]);
   int rightButtonState = digitalRead(buttonPins[1]);
-  int upButtonState = digitalRead(buttonPins[2]);
-  int downButtonState = digitalRead(buttonPins[3]);
 
-  // Check if left button is pressed
   if (leftButtonState == LOW)
   {
-    currentMenuOption = (currentMenuOption + 1) % 4;
-    delay(debounceDelay); // Debounce delay
+    currentMenuOption = (currentMenuOption + 1) % MENU_OPTIONS;
+    delay(DEBOUNCE_DELAY);
   }
 
-  // Check if right button is pressed
   if (rightButtonState == LOW)
   {
-    currentMenuOption = (currentMenuOption - 1 + 4) % 4;
-    delay(debounceDelay); // Debounce delay
+    currentMenuOption = (currentMenuOption - 1 + MENU_OPTIONS) % MENU_OPTIONS;
+    delay(DEBOUNCE_DELAY);
   }
+}
 
-  // Check if up button is pressed
-  if (upButtonState == LOW)
-  {
-    // Action for up button
-    delay(debounceDelay); // Debounce delay
-  }
-
-  // Check if down button is pressed
-  if (downButtonState == LOW)
-  {
-    // Action for down button
-    delay(debounceDelay); // Debounce delay
-  }
-
-  // Read CO2 measurements every 11 seconds
+void readSensors()
+{
   if (millis() - previousMillis >= 11000)
   {
-    // Read CO2 measurements
     uint16_t CO2;
-    float Temp;
-    float Hum;
+    float Temp, Hum;
     uint16_t error = scd4x.readMeasurement(CO2, Temp, Hum);
+
     if (!error)
     {
-      // Update circular buffers
       co2Index = (co2Index + 1) % BUFFER_SIZE;
       co2Array[co2Index] = CO2;
-      tempIndex = (tempIndex + 1) % TEMP_BUFFER_SIZE;
+      tempIndex = (tempIndex + 1) % BUFFER_SIZE;
       tempArray[tempIndex] = Temp;
-      humIndex = (humIndex + 1) % HUM_BUFFER_SIZE;
+      humIndex = (humIndex + 1) % BUFFER_SIZE;
       humArray[humIndex] = Hum;
-      // Update temperature and humidity
       temperature = Temp;
       humidity = Hum;
     }
+    else
+    {
+      Serial.print("Sensor read error: ");
+      Serial.println(error);
+    }
+
     previousMillis = millis();
   }
+}
 
+void drawMenu()
+{
+  display.clearDisplay();
   switch (currentMenuOption)
   {
   case 0:
@@ -279,4 +214,11 @@ void loop()
     break;
   }
   display.display();
+}
+
+void loop()
+{
+  readButtons();
+  readSensors();
+  drawMenu();
 }
