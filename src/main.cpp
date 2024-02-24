@@ -8,6 +8,14 @@
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
 SensirionI2CScd4x scd4x;
 
+// *****************************************************************************
+
+// Define the pins for the fans
+const int fanPin1 = 13; // PWM pin for fan 1
+const int fanPin2 = 12; // PWM pin for fan 2
+
+// *****************************************************************************
+
 // Define circular buffer for CO2 values
 const int BUFFER_SIZE = 128;
 int co2Array[BUFFER_SIZE];
@@ -47,11 +55,15 @@ void setup()
   uint16_t CO2;
   float Temp;
   float Hum;
+
   // set button pins to high
   for (int i = 0; i < 4; i++)
   {
     pinMode(buttonPins[i], INPUT_PULLUP);
   }
+
+  pinMode(fanPin1, OUTPUT);
+  pinMode(fanPin2, OUTPUT);
 
   // Read initial CO2 measurement
   error = scd4x.readMeasurement(CO2, Temp, Hum);
@@ -113,6 +125,16 @@ void loop()
   int rightButtonState = digitalRead(buttonPins[1]);
   int upButtonState = digitalRead(buttonPins[2]);
   int downButtonState = digitalRead(buttonPins[3]);
+
+  // *****************************************************************************
+
+  // Set the speed of fan 1 to 50% duty cycle
+  analogWrite(fanPin1, 128); // 50% duty cycle out of 255
+
+  // Set the speed of fan 2 to 75% duty cycle
+  analogWrite(fanPin2, 191); // 75% duty cycle out of 255
+
+  // *****************************************************************************
 
   // Check if left button is pressed
   if (leftButtonState == LOW)
