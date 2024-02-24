@@ -99,30 +99,44 @@ int currentMenuOption = 0;
 
 unsigned long menuMillis = 0;
 // implement debouncing for buttons 100ms
-int debounceDelay = 10;
+int debounceDelay = 100;
+
+// Define variables to store previous values
+float previousTemperature = 0.0;
+float previousHumidity = 0.0;
+int previousCO2 = 0;
 
 void loop()
 {
-  // Read button states and check if pressed
-  if (digitalRead(buttonPins[0]) == LOW) // Left button
+  // Read button states
+  int leftButtonState = digitalRead(buttonPins[0]);
+  int rightButtonState = digitalRead(buttonPins[1]);
+  int upButtonState = digitalRead(buttonPins[2]);
+  int downButtonState = digitalRead(buttonPins[3]);
+
+  // Check if left button is pressed
+  if (leftButtonState == LOW)
   {
     currentMenuOption = (currentMenuOption + 1) % 4;
     delay(debounceDelay); // Debounce delay
   }
 
-  if (digitalRead(buttonPins[1]) == LOW) // Right button
+  // Check if right button is pressed
+  if (rightButtonState == LOW)
   {
     currentMenuOption = (currentMenuOption - 1 + 4) % 4;
     delay(debounceDelay); // Debounce delay
   }
 
-  if (digitalRead(buttonPins[2]) == LOW) // Up button
+  // Check if up button is pressed
+  if (upButtonState == LOW)
   {
     // Action for up button
     delay(debounceDelay); // Debounce delay
   }
 
-  if (digitalRead(buttonPins[3]) == LOW) // Down button
+  // Check if down button is pressed
+  if (downButtonState == LOW)
   {
     // Action for down button
     delay(debounceDelay); // Debounce delay
@@ -155,20 +169,29 @@ void loop()
   switch (currentMenuOption)
   {
   case 0:
-    display.clearDisplay();
-    display.setFont(&FreeMono12pt7b);
-    display.setTextSize(1);
-    display.setCursor(0, 15);
-    display.print("T: ");
-    display.print((int)temperature);
-    display.print(" C");
-    display.println();
-    display.print("H: ");
-    display.print((int)humidity);
-    display.print(" %");
-    display.println();
-    display.print("CO2:");
-    display.print(co2Array[co2Index]);
+    // Check if temperature has changed
+    if (temperature != previousTemperature || humidity != previousHumidity || co2Array[co2Index] != previousCO2)
+    {
+      display.clearDisplay();
+      display.setFont(&FreeMono12pt7b);
+      display.setTextSize(1);
+      display.setCursor(0, 15);
+      display.print("T: ");
+      display.print((int)temperature);
+      display.print(" C");
+      display.println();
+      display.print("H: ");
+      display.print((int)humidity);
+      display.print(" %");
+      display.println();
+      display.print("CO2:");
+      display.print(co2Array[co2Index]);
+
+      // Update previous values
+      previousTemperature = temperature;
+      previousHumidity = humidity;
+      previousCO2 = co2Array[co2Index];
+    }
     break;
 
   case 1:
@@ -201,7 +224,7 @@ void loop()
     {
       display.drawPixel(i, map(co2Array[i], 400, 2000, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
-    // delay(1000);
+    delay(1000);
     break;
 
   case 2:
@@ -233,7 +256,7 @@ void loop()
     {
       display.drawPixel(i, map(tempArray[i], 0, 50, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
-    // delay(1000);
+    delay(1000);
     break;
 
   case 3:
@@ -266,7 +289,7 @@ void loop()
     {
       display.drawPixel(i, map(humArray[i], 0, 100, display.height(), 0), SSD1306_WHITE); // Plot CO2 values
     }
-    // delay(1000);
+    delay(1000);
     break;
   }
   display.display();
