@@ -293,8 +293,8 @@ void loop()
     if (upButtonState == LOW)
     {
       // Increase fan speed
-      fanSpeed1 = min(fanSpeed1 + 5, 255); // Increment fan speed (limit to max)
-      fanSpeed2 = min(fanSpeed2 + 5, 255); // Increment fan speed (limit to max)
+      fanSpeed1 = min(fanSpeed1 + 8, 255); // Increment fan speed (limit to max)
+      fanSpeed2 = min(fanSpeed2 + 8, 255); // Increment fan speed (limit to max)
       delay(debounceDelay);                // Debounce delay
       // set analog write to fan pins to fan speed 1 and 2
       analogWrite(fanPin1, fanSpeed1);
@@ -304,8 +304,8 @@ void loop()
     if (downButtonState == LOW)
     {
       // Decrease fan speed
-      fanSpeed1 = max(fanSpeed1 - 5, 0); // Decrement fan speed (limit to min)
-      fanSpeed2 = max(fanSpeed2 - 5, 0); // Decrement fan speed (limit to min)
+      fanSpeed1 = max(fanSpeed1 - 8, 0); // Decrement fan speed (limit to min)
+      fanSpeed2 = max(fanSpeed2 - 8, 0); // Decrement fan speed (limit to min)
       delay(debounceDelay);              // Debounce delay
       // set analog write to fan pins to fan speed 1 and 2
       analogWrite(fanPin1, fanSpeed1);
@@ -315,11 +315,14 @@ void loop()
     display.clearDisplay();
     display.setFont(&FreeMono9pt7b);
     display.setCursor(0, 15);
-    display.print("Fan  1: ");
-    display.println(map(fanSpeed1, 0, 255, 0, 100));
-    display.print("Fan  2: ");
-    display.println(map(fanSpeed2, 0, 255, 0, 100));
+    display.print("Fan 1: ");
+    display.print(map(fanSpeed1, 0, 255, 0, 100));
+    display.println("%");
+    display.print("Fan 2: ");
+    display.print(map(fanSpeed2, 0, 255, 0, 100));
+    display.println("%");
     display.display();
+
     break;
   }
   display.display();
