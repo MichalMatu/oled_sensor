@@ -55,6 +55,7 @@ void setup()
   uint16_t CO2;
   float Temp;
   float Hum;
+  // *****************************************************************************
 
   // set button pins to high
   for (int i = 0; i < 4; i++)
@@ -64,6 +65,14 @@ void setup()
 
   pinMode(fanPin1, OUTPUT);
   pinMode(fanPin2, OUTPUT);
+
+  // Set the speed of fan 1 to 50% duty cycle
+  analogWrite(fanPin1, 0); // 50% duty cycle out of 255
+
+  // Set the speed of fan 2 to 75% duty cycle
+  analogWrite(fanPin2, 0); // 75% duty cycle out of 255
+
+  // *****************************************************************************
 
   // Read initial CO2 measurement
   error = scd4x.readMeasurement(CO2, Temp, Hum);
@@ -118,6 +127,9 @@ float previousTemperature = 0.0;
 float previousHumidity = 0.0;
 int previousCO2 = 0;
 
+int fan1Speed = 0;
+int fan2Speed = 0;
+
 void loop()
 {
   // Read button states
@@ -125,16 +137,6 @@ void loop()
   int rightButtonState = digitalRead(buttonPins[1]);
   int upButtonState = digitalRead(buttonPins[2]);
   int downButtonState = digitalRead(buttonPins[3]);
-
-  // *****************************************************************************
-
-  // Set the speed of fan 1 to 50% duty cycle
-  analogWrite(fanPin1, 128); // 50% duty cycle out of 255
-
-  // Set the speed of fan 2 to 75% duty cycle
-  analogWrite(fanPin2, 191); // 75% duty cycle out of 255
-
-  // *****************************************************************************
 
   // Check if left button is pressed
   if (leftButtonState == LOW)
@@ -296,6 +298,45 @@ void loop()
     delay(100);
     break;
   case 4:
+
+    if (upButtonState == LOW)
+    {
+      fan1Speed += 8;
+      fan2Speed += 8;
+      // Restrict fan speeds to 0-255 range
+      if (fan1Speed > 255)
+        fan1Speed = 255;
+      if (fan2Speed > 255)
+        fan2Speed = 255;
+      delay(debounceDelay);
+    }
+
+    if (downButtonState == LOW)
+    {
+      fan1Speed -= 8;
+      fan2Speed -= 8;
+      // Restrict fan speeds to 0-255 range
+      if (fan1Speed < 0)
+        fan1Speed = 0;
+      if (fan2Speed < 0)
+        fan2Speed = 0;
+      delay(debounceDelay);
+    }
+
+    // set both fan speed to new value
+
+    analogWrite(fanPin1, fan1Speed);
+    analogWrite(fanPin2, fan2Speed);
+
+    // display fan speed
+    display.clearDisplay();
+    display.setCursor(0, 10);
+    display.setFont(&FreeMono9pt7b);
+    display.print("Fans Speed: ");
+    display.setCursor(60, 50);
+    display.print(map(fan1Speed, 0, 255, 0, 100));
+    // add space and %
+    display.print(" %");
 
     break;
   }
