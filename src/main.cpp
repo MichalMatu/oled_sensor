@@ -117,7 +117,7 @@ void setup()
 }
 
 unsigned long previousMillis = 0;
-int currentMenuOption = 1;
+int currentMenuOption = 4;
 
 unsigned long menuMillis = 0;
 // implement debouncing for buttons 100ms
@@ -302,8 +302,8 @@ void loop()
 
     if (upButtonState == LOW)
     {
-      fan1Speed += 8;
-      fan2Speed += 8;
+      fan1Speed += 13;
+      fan2Speed += 13;
       // Restrict fan speeds to 0-255 range
       if (fan1Speed > 255)
         fan1Speed = 255;
@@ -314,8 +314,8 @@ void loop()
 
     if (downButtonState == LOW)
     {
-      fan1Speed -= 8;
-      fan2Speed -= 8;
+      fan1Speed -= 13;
+      fan2Speed -= 13;
       // Restrict fan speeds to 0-255 range
       if (fan1Speed < 0)
         fan1Speed = 0;
