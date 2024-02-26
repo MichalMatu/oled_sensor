@@ -14,9 +14,6 @@ SensirionI2CScd4x scd4x;
 const int fanPin1 = 13; // PWM pin for fan 1
 const int fanPin2 = 12; // PWM pin for fan 2
 
-int fanSpeed1 = 0;
-int fanSpeed2 = 0;
-
 // *****************************************************************************
 
 // Define circular buffer for CO2 values
@@ -110,7 +107,7 @@ void setup()
 }
 
 unsigned long previousMillis = 0;
-int currentMenuOption = 4;
+int currentMenuOption = 1;
 
 unsigned long menuMillis = 0;
 // implement debouncing for buttons 100ms
@@ -131,25 +128,35 @@ void loop()
 
   // *****************************************************************************
 
-  // // Set the speed of fan 1 to 50% duty cycle
-  // analogWrite(fanPin1, 128); // 50% duty cycle out of 255
+  // Set the speed of fan 1 to 50% duty cycle
+  analogWrite(fanPin1, 128); // 50% duty cycle out of 255
 
-  // // Set the speed of fan 2 to 75% duty cycle
-  // analogWrite(fanPin2, 191); // 75% duty cycle out of 255
+  // Set the speed of fan 2 to 75% duty cycle
+  analogWrite(fanPin2, 191); // 75% duty cycle out of 255
 
   // *****************************************************************************
 
   // Check if left button is pressed
   if (leftButtonState == LOW)
   {
-    currentMenuOption = (currentMenuOption + 1) % 5;
+    currentMenuOption--;
+
+    if (currentMenuOption < 0)
+    {
+      currentMenuOption = 5;
+    }
     delay(debounceDelay); // Debounce delay
   }
 
   // Check if right button is pressed
   if (rightButtonState == LOW)
   {
-    currentMenuOption = (currentMenuOption - 1 + 5) % 5;
+    currentMenuOption++;
+
+    if (currentMenuOption > 5)
+    {
+      currentMenuOption = 0;
+    }
     delay(debounceDelay); // Debounce delay
   }
 
@@ -289,39 +296,6 @@ void loop()
     delay(100);
     break;
   case 4:
-    // Check if up button is pressed
-    if (upButtonState == LOW)
-    {
-      // Increase fan speed
-      fanSpeed1 = min(fanSpeed1 + 8, 255); // Increment fan speed (limit to max)
-      fanSpeed2 = min(fanSpeed2 + 8, 255); // Increment fan speed (limit to max)
-      delay(debounceDelay);                // Debounce delay
-      // set analog write to fan pins to fan speed 1 and 2
-      analogWrite(fanPin1, fanSpeed1);
-    }
-
-    // Check if down button is pressed
-    if (downButtonState == LOW)
-    {
-      // Decrease fan speed
-      fanSpeed1 = max(fanSpeed1 - 8, 0); // Decrement fan speed (limit to min)
-      fanSpeed2 = max(fanSpeed2 - 8, 0); // Decrement fan speed (limit to min)
-      delay(debounceDelay);              // Debounce delay
-      // set analog write to fan pins to fan speed 1 and 2
-      analogWrite(fanPin1, fanSpeed1);
-    }
-
-    // Display fan speeds on OLED screen
-    display.clearDisplay();
-    display.setFont(&FreeMono9pt7b);
-    display.setCursor(0, 15);
-    display.print("Fan 1: ");
-    display.print(map(fanSpeed1, 0, 255, 0, 100));
-    display.println("%");
-    display.print("Fan 2: ");
-    display.print(map(fanSpeed2, 0, 255, 0, 100));
-    display.println("%");
-    display.display();
 
     break;
   }
