@@ -3,6 +3,7 @@
 #include <SensirionI2CScd4x.h>
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeMono12pt7b.h>
+#include <Fonts/FreeMono18pt7b.h>
 #include <Fonts/Org_01.h>
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
@@ -333,7 +334,8 @@ void loop()
     display.setCursor(0, 10);
     display.setFont(&FreeMono9pt7b);
     display.print("Fans Speed: ");
-    display.setCursor(60, 50);
+    display.setCursor(30, 50);
+    display.setFont(&FreeMono18pt7b);
     display.print(map(fan1Speed, 0, 255, 0, 100));
     // add space and %
     display.print(" %");
