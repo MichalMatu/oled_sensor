@@ -121,7 +121,8 @@ int currentMenuOption = 4;
 
 unsigned long menuMillis = 0;
 // implement debouncing for buttons 100ms
-int debounceDelay = 100;
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 150;
 
 // Define variables to store previous values
 float previousTemperature = 0.0;
@@ -140,7 +141,7 @@ void loop()
   int downButtonState = digitalRead(buttonPins[3]);
 
   // Check if left button is pressed
-  if (leftButtonState == LOW)
+  if (leftButtonState == LOW && millis() - lastDebounceTime > debounceDelay)
   {
     currentMenuOption--;
 
@@ -148,11 +149,11 @@ void loop()
     {
       currentMenuOption = 5;
     }
-    delay(debounceDelay); // Debounce delay
+    lastDebounceTime = millis(); // Reset the debounce timer
   }
 
   // Check if right button is pressed
-  if (rightButtonState == LOW)
+  if (rightButtonState == LOW && millis() - lastDebounceTime > debounceDelay)
   {
     currentMenuOption++;
 
@@ -160,21 +161,7 @@ void loop()
     {
       currentMenuOption = 0;
     }
-    delay(debounceDelay); // Debounce delay
-  }
-
-  // Check if up button is pressed
-  if (upButtonState == LOW)
-  {
-    // Action for up button
-    delay(debounceDelay); // Debounce delay
-  }
-
-  // Check if down button is pressed
-  if (downButtonState == LOW)
-  {
-    // Action for down button
-    delay(debounceDelay); // Debounce delay
+    lastDebounceTime = millis(); // Reset the debounce timer
   }
 
   // Read CO2 measurements every 11 seconds
