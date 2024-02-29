@@ -15,6 +15,9 @@ SensirionI2CScd4x scd4x;
 const int fanPin1 = 13; // PWM pin for fan 1
 const int fanPin2 = 12; // PWM pin for fan 2
 
+int fan1Speed = 0;
+int fan2Speed = 0;
+
 // *****************************************************************************
 
 // Define circular buffer for CO2 values
@@ -68,10 +71,10 @@ void setup()
   pinMode(fanPin2, OUTPUT);
 
   // Set the speed of fan 1 to 50% duty cycle
-  analogWrite(fanPin1, 0); // 50% duty cycle out of 255
+  analogWrite(fanPin1, fan1Speed); // 0% duty cycle out of 255
 
   // Set the speed of fan 2 to 75% duty cycle
-  analogWrite(fanPin2, 0); // 75% duty cycle out of 255
+  analogWrite(fanPin2, fan2Speed); // 0% duty cycle out of 255
 
   // *****************************************************************************
 
@@ -128,9 +131,6 @@ unsigned long debounceDelay = 150;
 float previousTemperature = 0.0;
 float previousHumidity = 0.0;
 int previousCO2 = 0;
-
-int fan1Speed = 0;
-int fan2Speed = 0;
 
 void loop()
 {
